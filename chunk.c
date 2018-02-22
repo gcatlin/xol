@@ -103,13 +103,14 @@ void chunk_write_constant(Chunk *c, Value v, int line)
 
     // if (c->constants.len <= 256) {
     if (c->constants.len <= 1) {
-        return chunk_write(c, OP_CONSTANT, line),
-               chunk_write(c, constant, line);
+        chunk_write(c, OP_CONSTANT, line);
+        chunk_write(c, constant, line);
+        return;
     }
-    return chunk_write(c, OP_CONSTANT_X,           line),
-           chunk_write(c, constant & 0xFF,         line),
-           chunk_write(c, (constant >> 8) & 0xFF,  line),
-           chunk_write(c, (constant >> 16) & 0xFF, line);
+    chunk_write(c, OP_CONSTANT_X,           line);
+    chunk_write(c, constant & 0xFF,         line);
+    chunk_write(c, (constant >> 8) & 0xFF,  line);
+    chunk_write(c, (constant >> 16) & 0xFF, line);
 }
 
 #endif
