@@ -18,11 +18,6 @@ static int InstrSize[] = {
 };
 
 typedef struct {
-    int line;
-    int byte_offset;
-} CodeLine;
-
-typedef struct {
     int len;
     int cap;
     int lines_len; // for `lines` and `offsets`
@@ -72,7 +67,9 @@ int chunk_get_line(const Chunk *c, const int offset)
         else if (offset > c->offsets[mid]) { low = mid + 1; }
         else { found = true; break; }
     }
-    if (!found) { mid -= (c->offsets[mid] < offset) ? 0 : 1; }
+    if (!found && offset <= c->offsets[mid]) {
+        --mid;
+    }
     return c->lines[mid];
 }
 
@@ -82,7 +79,8 @@ void chunk_write(Chunk *c, byte b, int line)
         int old_cap = c->cap;
         c->cap = GROW_CAPACITY(old_cap);
         c->code = GROW_ARRAY(c->code, byte, old_cap, c->cap);
-    } if (c->lines_len == 0 || c->lines[c->lines_len - 1] != line) {
+    }
+    if (c->lines_len == 0 || c->lines[c->lines_len - 1] != line) {
         if (c->lines_cap < c->lines_len + 1) {
             int old_cap = c->lines_cap;
             c->lines_cap = GROW_CAPACITY(old_cap);
@@ -101,12 +99,12 @@ void chunk_write_constant(Chunk *c, Value v, int line)
 {
     int constant = chunk_add_constant(c, v);
 
-    // if (c->constants.len <= 256) {
-    if (c->constants.len <= 1) {
+    if (c->constants.len <= 0xFF) {
         chunk_write(c, OP_CONSTANT, line);
         chunk_write(c, constant, line);
         return;
     }
+
     chunk_write(c, OP_CONSTANT_X,           line);
     chunk_write(c, constant & 0xFF,         line);
     chunk_write(c, (constant >> 8) & 0xFF,  line);

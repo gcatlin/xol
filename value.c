@@ -36,9 +36,4 @@ void value_array_write(ValueArray *va, Value v)
     va->len++;
 }
 
-void value_print(Value v)
-{
-    printf("%g", v);
-}
-
 #endif

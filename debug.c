@@ -8,12 +8,17 @@
 #define HEX "%02hhX"
 // #define HEX "0x%02hhx"
 
+void print_value(Value v)
+{
+    printf("%g", v);
+}
+
 int const_instr(const char *name, const Chunk *c, const int offset)
 {
     byte byte0 = c->code[offset + 1];
     int constant = byte0;
     printf("%-16s %4d '", name, constant);
-    value_print(c->constants.values[constant]);
+    print_value(c->constants.values[constant]);
     printf("'\n");
     return offset + 2;
 }
@@ -25,7 +30,7 @@ int const_long_instr(const char *name, const Chunk *c, const int offset)
     byte byte2 = c->code[offset + 3];
     int constant = byte0 | (byte1 << 8) | (byte2 << 16);
     printf("%-16s %4d '", name, constant);
-    value_print(c->constants.values[constant]);
+    print_value(c->constants.values[constant]);
     printf("'\n");
     return offset + 4;
 }
@@ -78,7 +83,6 @@ void chunk_disassemble(Chunk *c, const char *name)
     printf("=== %s ===\n", name);
     printf("OFFSET B0 B1 B2 B3 LINE   OPCODE\n");
     printf("------ -- -- -- -- -----  ----------------\n");
-    // TODO print column header
     for (int i = 0; i < c->len; ) {
         i = instr_disassemble(c, i);
     }
