@@ -28,7 +28,7 @@ int const_long_instr(const char *name, const Chunk *c, const int offset)
     byte byte0 = c->code[offset + 1];
     byte byte1 = c->code[offset + 2];
     byte byte2 = c->code[offset + 3];
-    int constant = byte0 | (byte1 << 8) | (byte2 << 16);
+    int constant = (byte0 << 0) | (byte1 << 8) | (byte2 << 16);
     printf("%-16s %4d '", name, constant);
     print_value(c->constants.values[constant]);
     printf("'\n");
