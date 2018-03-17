@@ -1,24 +1,19 @@
-#ifndef _DEBUG_C_
-#define _DEBUG_C_
+#pragma once
 
-#include "common.h"
 #include "chunk.c"
-#include "value.c"
+#include "common.h"
 
 #define HEX "%02hhX"
 // #define HEX "0x%02hhx"
 
-void print_value(Value v)
-{
-    printf("%g", v);
-}
+void print_value(Value v) { printf("%g", v); }
 
 int const_instr(const char *name, const Chunk *c, const int offset)
 {
     byte byte0 = c->code[offset + 1];
     int constant = byte0;
     printf("%-16s %4d '", name, constant);
-    print_value(c->constants.values[constant]);
+    print_value(c->constants[constant]);
     printf("'\n");
     return offset + 2;
 }
@@ -30,7 +25,7 @@ int const_long_instr(const char *name, const Chunk *c, const int offset)
     byte byte2 = c->code[offset + 3];
     int constant = (byte0 << 0) | (byte1 << 8) | (byte2 << 16);
     printf("%-16s %4d '", name, constant);
-    print_value(c->constants.values[constant]);
+    print_value(c->constants[constant]);
     printf("'\n");
     return offset + 4;
 }
@@ -70,10 +65,18 @@ int instr_disassemble(const Chunk *chunk, const int offset)
     }
 
     switch (instr) {
-        case OP_CONSTANT:   const_instr("OP_CONSTANT", chunk, offset); break;
-        case OP_CONSTANT_X: const_long_instr("OP_CONSTANT_X", chunk, offset); break;
-        case OP_RETURN:     simple_instr("OP_RETURN", offset); break;
-        default:            unknown_instr(instr, offset); break;
+    case OP_CONSTANT:
+        const_instr("OP_CONSTANT", chunk, offset);
+        break;
+    case OP_CONSTANT_X:
+        const_long_instr("OP_CONSTANT_X", chunk, offset);
+        break;
+    case OP_RETURN:
+        simple_instr("OP_RETURN", offset);
+        break;
+    default:
+        unknown_instr(instr, offset);
+        break;
     }
     return offset + size;
 }
@@ -83,9 +86,7 @@ void chunk_disassemble(Chunk *c, const char *name)
     printf("=== %s ===\n", name);
     printf("OFFSET B0 B1 B2 B3 LINE   OPCODE\n");
     printf("------ -- -- -- -- -----  ----------------\n");
-    for (int i = 0; i < c->len; ) {
+    for (int i = 0, max = buf_len(c->code); i < max;) {
         i = instr_disassemble(c, i);
     }
 }
-
-#endif
