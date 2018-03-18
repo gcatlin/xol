@@ -28,8 +28,6 @@ void chunk_init(Chunk *c)
     buf_reserve(c->lines, 8);
     buf_reserve(c->offsets, 8);
     buf_reserve(c->constants, 8);
-    // buf_push(c->lines, 0);
-    // buf_push(c->offsets, 0);
 }
 
 int chunk_add_constant(Chunk *c, const Value v)
@@ -89,7 +87,7 @@ void chunk_write_constant(Chunk *c, Value v, int line)
         return;
     }
     chunk_write(c, OP_CONSTANT_X, line);
-    chunk_write(c, constant & 0xFF, line);
-    chunk_write(c, (constant >> 8) & 0xFF, line);
-    chunk_write(c, (constant >> 16) & 0xFF, line);
+    chunk_write(c, (constant >> 0), line);
+    chunk_write(c, (constant >> 8), line);
+    chunk_write(c, (constant >> 16), line);
 }
