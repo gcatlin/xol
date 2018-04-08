@@ -6,13 +6,18 @@
 typedef enum {
     OP_CONSTANT,
     OP_CONSTANT_X,
+    OP_ADD,
+    OP_SUB,
+    OP_MUL,
+    OP_DIV,
+    OP_NEGATE,
     OP_RETURN,
+    OP_MAX,
 } OpCode;
 
-static int InstrSize[] = {
+static int InstrSize[OP_MAX] = {
     [OP_CONSTANT] = 2,
     [OP_CONSTANT_X] = 4,
-    [OP_RETURN] = 1,
 };
 
 typedef struct {

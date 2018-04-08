@@ -6,7 +6,10 @@
 #define HEX "%02hhX"
 // #define HEX "0x%02hhx"
 
-void print_value(Value v) { printf("%g", v); }
+void print_value(Value v)
+{
+    printf("%g", v);
+}
 
 int const_instr(const char *name, const Chunk *c, const int offset)
 {
@@ -46,7 +49,7 @@ int instr_disassemble(const Chunk *chunk, const int offset)
 {
     int line = chunk_get_line(chunk, offset);
     byte instr = chunk->code[offset];
-    int size = InstrSize[instr]; // TODO handle invalid instr (size=1)
+    int size = InstrSize[instr] ? InstrSize[instr] : 1;
 
     // Instruction bytes
     printf("%06d ", offset);
@@ -65,18 +68,15 @@ int instr_disassemble(const Chunk *chunk, const int offset)
     }
 
     switch (instr) {
-    case OP_CONSTANT:
-        const_instr("OP_CONSTANT", chunk, offset);
-        break;
-    case OP_CONSTANT_X:
-        const_long_instr("OP_CONSTANT_X", chunk, offset);
-        break;
-    case OP_RETURN:
-        simple_instr("OP_RETURN", offset);
-        break;
-    default:
-        unknown_instr(instr, offset);
-        break;
+        case OP_CONSTANT: const_instr("OP_CONSTANT", chunk, offset); break;
+        case OP_CONSTANT_X: const_long_instr("OP_CONSTANT_X", chunk, offset); break;
+        case OP_ADD: simple_instr("OP_ADD", offset); break;
+        case OP_SUB: simple_instr("OP_SUB", offset); break;
+        case OP_MUL: simple_instr("OP_MUL", offset); break;
+        case OP_DIV: simple_instr("OP_DIV", offset); break;
+        case OP_NEGATE: simple_instr("OP_NEGATE", offset); break;
+        case OP_RETURN: simple_instr("OP_RETURN", offset); break;
+        default: unknown_instr(instr, offset); break;
     }
     return offset + size;
 }

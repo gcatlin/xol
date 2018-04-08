@@ -13,3 +13,6 @@ build:
 
 run: build
 	@./${NAME}
+
+format:
+	clang-format -i *.c *.h
