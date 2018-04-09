@@ -17,7 +17,7 @@ int const_instr(const char *name, const Chunk *c, const int offset)
     int constant = byte0;
     printf("%-16s %4d '", name, constant);
     print_value(c->constants[constant]);
-    printf("'\n");
+    printf("'");
     return offset + 2;
 }
 
@@ -29,19 +29,19 @@ int const_long_instr(const char *name, const Chunk *c, const int offset)
     int constant = (byte0 << 0) | (byte1 << 8) | (byte2 << 16);
     printf("%-16s %4d '", name, constant);
     print_value(c->constants[constant]);
-    printf("'\n");
+    printf("'");
     return offset + 4;
 }
 
 int simple_instr(const char *name, const int offset)
 {
-    printf("%-16s\n", name);
+    printf("%-16s           ", name);
     return offset + 1;
 }
 
 int unknown_instr(const byte instr, const int offset)
 {
-    printf("Unknown opcode: %d\n", instr);
+    printf("Unknown opcode: %d", instr);
     return offset + 1;
 }
 
@@ -78,6 +78,7 @@ int instr_disassemble(const Chunk *chunk, const int offset)
         case OP_RETURN: simple_instr("OP_RETURN", offset); break;
         default: unknown_instr(instr, offset); break;
     } // clang-format on
+
     return offset + size;
 }
 
@@ -88,5 +89,7 @@ void chunk_disassemble(Chunk *c, const char *name)
     printf("------ -- -- -- -- -----  ----------------\n");
     for (int i = 0, max = buf_len(c->code); i < max;) {
         i = instr_disassemble(c, i);
+        printf("\n");
     }
+    printf("\n");
 }
