@@ -12,10 +12,10 @@ typedef enum {
     OP_DIV,
     OP_NEGATE,
     OP_RETURN,
-    OP_MAX,
+    op__count,
 } OpCode;
 
-static int InstrSize[OP_MAX] = {
+static int InstrSize[op__count] = {
     [OP_CONSTANT] = 2,
     [OP_CONSTANT_X] = 4,
 };

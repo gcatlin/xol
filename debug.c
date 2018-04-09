@@ -52,7 +52,7 @@ int instr_disassemble(const Chunk *chunk, const int offset)
     int size = InstrSize[instr] ? InstrSize[instr] : 1;
 
     // Instruction bytes
-    printf("%06d ", offset);
+    printf("%06X ", offset);
     for (int i = 0; i < size; ++i) {
         printf(HEX " ", (byte)chunk->code[offset + i]);
     }
@@ -67,7 +67,7 @@ int instr_disassemble(const Chunk *chunk, const int offset)
         printf("%5d  ", line);
     }
 
-    switch (instr) {
+    switch (instr) { // clang-format off
         case OP_CONSTANT: const_instr("OP_CONSTANT", chunk, offset); break;
         case OP_CONSTANT_X: const_long_instr("OP_CONSTANT_X", chunk, offset); break;
         case OP_ADD: simple_instr("OP_ADD", offset); break;
@@ -77,7 +77,7 @@ int instr_disassemble(const Chunk *chunk, const int offset)
         case OP_NEGATE: simple_instr("OP_NEGATE", offset); break;
         case OP_RETURN: simple_instr("OP_RETURN", offset); break;
         default: unknown_instr(instr, offset); break;
-    }
+    } // clang-format on
     return offset + size;
 }
 

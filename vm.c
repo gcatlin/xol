@@ -34,26 +34,12 @@ void vm_free(VM *vm)
     buf_free(vm->stack);
 }
 
-void vm_push(VM *vm, Value value)
-{
-    buf_push(vm->stack, value);
-}
-
-Value vm_pop(VM *vm)
-{
-    return *buf_pop(vm->stack);
-}
-
 static VMInterpretResult vm_run(VM *vm)
 {
-#define READ_BYTE() (*vm->ip++)
-#define READ_CONSTANT() (vm->chunk->constants[READ_BYTE()])
-#define BINARY_OP(op) \
-    do { \
-      double b = vm_pop(vm); \
-      double a = vm_pop(vm); \
-      vm_push(vm, a op b); \
-    } while (false)
+#define PUSH(value) (buf_push(vm->stack, value))
+#define POP() (*buf_pop(vm->stack))
+#define NEXT() (*vm->ip++)
+#define READ_CONSTANT() (vm->chunk->constants[NEXT()])
 
     for (;;) {
 #ifdef DEBUG_TRACE_EXECUTION
@@ -67,35 +53,26 @@ static VMInterpretResult vm_run(VM *vm)
         instr_disassemble(vm->chunk, (int)(vm->ip - vm->chunk->code));
 #endif
         byte instr;
-        switch (instr = READ_BYTE()) {
-            case OP_CONSTANT: {
-                Value constant = READ_CONSTANT();
-                vm_push(vm, constant);
-                break;
-            }
-            case OP_ADD: { BINARY_OP(+); break; }
-            case OP_SUB: { BINARY_OP(-); break; }
-            case OP_MUL: { BINARY_OP(*); break; }
-            case OP_DIV: { BINARY_OP(/); break; }
-            case OP_NEGATE: { vm_push(vm, -vm_pop(vm)); break; }
-            case OP_RETURN: {
-                print_value(vm_pop(vm));
-                printf("\n");
-                return INTERPRET_OK;
-            }
-        }
+        switch (instr = NEXT()) { // clang-format off
+            case OP_CONSTANT: { PUSH(READ_CONSTANT()); break; }
+            case OP_ADD: { PUSH(POP() + POP()); break; }
+            case OP_SUB: { PUSH(-POP() + POP()); break; }
+            case OP_MUL: { PUSH(POP() * POP()); break; }
+            case OP_DIV: { Value y = POP(); Value x = POP(); PUSH(x / y); break; }
+            case OP_NEGATE: { PUSH(-POP()); break; }
+            case OP_RETURN: { print_value(POP()); printf("\n"); return INTERPRET_OK; }
+        } // clang-format on
     }
 
-#undef BINARY_OP
+#undef PUSH
+#undef POP
+#undef NEXT
 #undef READ_CONSTANT
-#undef READ_BYTE
 }
 
 VMInterpretResult vm_interpret(VM *vm, Chunk *chunk)
 {
     vm->chunk = chunk;
     vm->ip = vm->chunk->code;
-
-    VMInterpretResult result = vm_run(vm);
-    return result;
+    return vm_run(vm);
 }
