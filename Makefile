@@ -8,11 +8,19 @@ CC = clang
 
 all: build
 
+.PHONY: build
 build:
 	@${CC} ${SRC_FILES} ${CC_FLAGS} -o ${NAME}
 
+.PHONY: clean
+clean:
+	@rm -rf ${NAME} ${NAME}.dSYM
+
+.PHONY: run
 run: build
 	@./${NAME}
 
+.PHONY: format
 format:
 	clang-format -i *.c *.h
+
