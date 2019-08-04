@@ -1,10 +1,12 @@
 #pragma once
-#include "buf.h"
-#include "chunk.c"
-#include "common.h"
-#include "debug.c"
 
-#include <stdio.h>
+#include "buf.h"
+#include "common.h"
+
+#include "chunk.c"
+#include "debug.c"
+#include "scanner.c"
+#include "token.c"
 
 typedef enum {
     INTERPRET_OK,
@@ -76,9 +78,37 @@ static VMInterpretResult vm_run(VM *vm)
 #undef READ_CONSTANT_X
 }
 
-VMInterpretResult vm_interpret(VM *vm, Chunk *chunk)
+static void vm_compile(VM *vm, const char *source)
 {
-    vm->chunk = chunk;
-    vm->ip = vm->chunk->code;
-    return vm_run(vm);
+    Scanner *s = calloc(1, sizeof(Scanner));
+    scanner_init(s, source);
+
+    int line = -1;
+    for (;;) {
+        Token token = scanner_scan_token(s);
+        if (token.line != line) {
+            printf("%4d ", token.line);
+            line = token.line;
+        } else {
+            printf("   | ");
+        }
+
+        if (token.type == TOKEN_EOF) {
+            puts("EOF");
+            break;
+        }
+        switch (token.type) {
+            case TOKEN_ERROR:
+                printf(ANSI_FG_RED "ERROR        " ANSI_RESET " %.*s\n", token.length, token.start);
+                break;
+            default:
+                printf("%-13s '%.*s'\n", token_type_name(token.type)+6, token.length, token.start);
+        }
+    }
+}
+
+static VMInterpretResult vm_interpret(VM *vm, const char *source)
+{
+    vm_compile(vm, source);
+    return INTERPRET_OK;
 }
