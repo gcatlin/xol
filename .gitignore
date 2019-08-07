@@ -1,6 +1,8 @@
 # Xol
 xol
 
+.ccls-cache/
+
 # Prerequisites
 *.d
 
