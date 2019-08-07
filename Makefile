@@ -1,7 +1,6 @@
 NAME = xol
 SRC_FILES = main.c
 CC_FLAGS = -g -std=c11 -Wall -Wextra -Wpedantic \
-		   -Wno-unused-function -Wno-unused-parameter -Wno-missing-field-initializers \
 		   -Wno-pragma-once-outside-header \
 		   -fsanitize=address
 CC = clang
@@ -23,4 +22,3 @@ run: build
 .PHONY: format
 format:
 	clang-format -i *.c *.h
-
