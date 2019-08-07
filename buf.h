@@ -1,6 +1,13 @@
 #pragma once
-#include "common.h"
 
+#include <assert.h>
+#include <limits.h>
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdlib.h>
+#include <stdint.h>
+
+#define BUF_COUNT(x) ((sizeof(x) / sizeof(0 [x])) / ((size_t)(!(sizeof(x) % sizeof(0 [x])))))
 #define BUF_MAX(a, b) ((a) > (b) ? (a) : (b))
 
 typedef struct {
@@ -105,9 +112,9 @@ void buf_append_test(void)
     //     {},
     // };
     // // clang-format on
-    // for (struct t *t = tt, *end = tt + countof(tt); t != end; ++t) {
+    // for (struct t *t = tt, *end = tt + BUF_COUNT(tt); t != end; ++t) {
     //     int *b = NULL;
-    //     int n_init = countof(t->init);
+    //     int n_init = BUF_COUNT(t->init);
     //     if (t->init) for (int i = 0; i < n_init; ++i) buf_push(b, t->init[i]);
     //     if (t->reserve) buf_reserve(b, t->reserve);
     //     int *a = buf_append(b, t->append);
@@ -146,9 +153,9 @@ void buf_at_test(void)
     //     {},
     // };
     // // clang-format on
-    // for (struct t *t = tt, *end = tt + countof(tt); t != end; ++t) {
+    // for (struct t *t = tt, *end = tt + BUF_COUNT(tt); t != end; ++t) {
     //     int *b = NULL;
-    //     int n_init = countof(t->init);
+    //     int n_init = BUF_COUNT(t->init);
     //     if (t->init) for (int i = 0; i < n_init; ++i) buf_push(b, t->init[i]);
     //     buf_free(b);
     // }
@@ -161,7 +168,7 @@ void buf_clear_test(void)
     // } tt[] = {
     // };
     // // clang-format on
-    // for (struct t *t = tt, *end = tt + countof(tt); t != end; ++t) {
+    // for (struct t *t = tt, *end = tt + BUF_COUNT(tt); t != end; ++t) {
     // }
 
     int *b1 = NULL;
@@ -189,7 +196,7 @@ void buf_empty_test(void)
     // } tt[] = {
     // };
     // // clang-format on
-    // for (struct t *t = tt, *end = tt + countof(tt); t != end; ++t) {
+    // for (struct t *t = tt, *end = tt + BUF_COUNT(tt); t != end; ++t) {
     // }
 
     int *b1 = NULL;
@@ -213,7 +220,7 @@ void buf_end_test(void)
     // } tt[] = {
     // };
     // // clang-format on
-    // for (struct t *t = tt, *end = tt + countof(tt); t != end; ++t) {
+    // for (struct t *t = tt, *end = tt + BUF_COUNT(tt); t != end; ++t) {
     // }
 
     int *b1 = NULL;
@@ -238,7 +245,7 @@ void buf_free_test(void)
     // } tt[] = {
     // };
     // // clang-format on
-    // for (struct t *t = tt, *end = tt + countof(tt); t != end; ++t) {
+    // for (struct t *t = tt, *end = tt + BUF_COUNT(tt); t != end; ++t) {
     // }
 
     int *b1 = NULL;
@@ -263,7 +270,7 @@ void buf_last_test(void)
     // } tt[] = {
     // };
     // // clang-format on
-    // for (struct t *t = tt, *end = tt + countof(tt); t != end; ++t) {
+    // for (struct t *t = tt, *end = tt + BUF_COUNT(tt); t != end; ++t) {
     // }
 
     int *b1 = NULL;
@@ -288,7 +295,7 @@ void buf_push_test(void)
     // } tt[] = {
     // };
     // // clang-format on
-    // for (struct t *t = tt, *end = tt + countof(tt); t != end; ++t) {
+    // for (struct t *t = tt, *end = tt + BUF_COUNT(tt); t != end; ++t) {
     // }
 
     int *b = NULL;
@@ -313,7 +320,7 @@ void buf_pop_test(void)
     // } tt[] = {
     // };
     // // clang-format on
-    // for (struct t *t = tt, *end = tt + countof(tt); t != end; ++t) {
+    // for (struct t *t = tt, *end = tt + BUF_COUNT(tt); t != end; ++t) {
     // }
 
     int *b1 = NULL;
@@ -345,7 +352,7 @@ void buf_reserve_test(void)
     // } tt[] = {
     // };
     // // clang-format on
-    // for (struct t *t = tt, *end = tt + countof(tt); t != end; ++t) {
+    // for (struct t *t = tt, *end = tt + BUF_COUNT(tt); t != end; ++t) {
     // }
 
     int *b1 = NULL;
@@ -379,7 +386,7 @@ void buf_take_test(void)
         {3,  1, 1},
     };
     // clang-format on
-    for (struct t *t = tt, *end = tt + countof(tt); t != end; ++t) {
+    for (struct t *t = tt, *end = tt + BUF_COUNT(tt); t != end; ++t) {
         int *b = NULL;
         buf_append(b, t->buf_len);
         buf_take(b, t->take);
