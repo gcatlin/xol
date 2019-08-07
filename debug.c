@@ -3,15 +3,13 @@
 #include "chunk.c"
 #include "common.h"
 
-#define HEX "%02hhX"
-// #define HEX "0x%02hhx"
 
-void print_value(Value v)
+static void print_value(Value v)
 {
     printf("%g", v);
 }
 
-int const_instr(const char *name, const Chunk *c, const int offset)
+static int const_instr(const char *name, const Chunk *c, const int offset)
 {
     byte byte0 = c->code[offset + 1];
     int constant = byte0;
@@ -21,7 +19,7 @@ int const_instr(const char *name, const Chunk *c, const int offset)
     return offset + 2;
 }
 
-int const_long_instr(const char *name, const Chunk *c, const int offset)
+static int const_long_instr(const char *name, const Chunk *c, const int offset)
 {
     byte byte0 = c->code[offset + 1];
     byte byte1 = c->code[offset + 2];
@@ -33,20 +31,22 @@ int const_long_instr(const char *name, const Chunk *c, const int offset)
     return offset + 4;
 }
 
-int simple_instr(const char *name, const int offset)
+static int simple_instr(const char *name, const int offset)
 {
     printf("%-16s           ", name);
     return offset + 1;
 }
 
-int unknown_instr(const byte instr, const int offset)
+static int unknown_instr(const byte instr, const int offset)
 {
     printf("Unknown opcode: %d", instr);
     return offset + 1;
 }
 
-int instr_disassemble(const Chunk *chunk, const int offset)
+static int instr_disassemble(const Chunk *chunk, const int offset)
 {
+#define HEX "%02hhX"
+
     int line = chunk_get_line(chunk, offset);
     byte instr = chunk->code[offset];
     int size = InstrSize[instr] ? InstrSize[instr] : 1;
@@ -80,9 +80,11 @@ int instr_disassemble(const Chunk *chunk, const int offset)
     } // clang-format on
 
     return offset + size;
+
+#undef HEX
 }
 
-void chunk_disassemble(Chunk *c, const char *name)
+static void chunk_disassemble(Chunk *c, const char *name)
 {
     printf("=== %s ===\n", name);
     printf("OFFSET B0 B1 B2 B3 LINE   OPCODE\n");
