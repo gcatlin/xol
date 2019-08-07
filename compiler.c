@@ -10,7 +10,11 @@ static void grouping();
 static void number();
 static void unary();
 
-ParseRule parse_rules[] = {
+static Chunk   *chunk;
+static Scanner scanner;
+static Parser  parser;
+
+static ParseRule parse_rules[] = {
     //                        prefix    infix    precedence
     [TOKEN_NONE]          = { NULL,     NULL,    PREC_NONE   },
     [TOKEN_BANG]          = { NULL,     NULL,    PREC_NONE   },
@@ -58,10 +62,6 @@ ParseRule parse_rules[] = {
     [TOKEN_ERROR]         = { NULL,     NULL,    PREC_NONE   },
     [TOKEN_EOF]           = { NULL,     NULL,    PREC_NONE   },
 }; 
-
-Chunk   *chunk;
-Parser  parser;
-Scanner scanner;
 
 static void error_at(Token *token, const char *message)
 {
@@ -243,4 +243,3 @@ static bool compile(const char *source, Chunk *ch)
     end_compiler();
     return !parser.had_error;
 }
-

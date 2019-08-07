@@ -2,7 +2,7 @@
 #include "buf.h"
 #include "vm.c"
 
-size_t fsize(FILE *stream)
+static size_t fsize(FILE *stream)
 {
     fseek(stream, 0L, SEEK_END);
     long size = ftell(stream);
@@ -10,7 +10,7 @@ size_t fsize(FILE *stream)
     return size;
 }
 
-int read_file(char *restrict buf, const char *restrict path)
+static int read_file(char *restrict buf, const char *restrict path)
 {
     FILE *file = fopen(path, "rb");
     if (!file) {

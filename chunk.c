@@ -3,7 +3,7 @@
 #include "common.h"
 #include "buf.h"
 
-void chunk_init(Chunk *c)
+static void chunk_init(Chunk *c)
 {
     buf_reserve(c->code, 1024);
     buf_reserve(c->lines, 8);
@@ -11,13 +11,13 @@ void chunk_init(Chunk *c)
     buf_reserve(c->constants, 8);
 }
 
-int chunk_add_constant(Chunk *c, const Value v)
+static int chunk_add_constant(Chunk *c, const Value v)
 {
     buf_push(c->constants, v);
     return buf_len(c->constants) - 1;
 }
 
-void chunk_free(Chunk *c)
+static void chunk_free(Chunk *c)
 {
     buf_free(c->code);
     buf_free(c->lines);
@@ -26,7 +26,7 @@ void chunk_free(Chunk *c)
     chunk_init(c);
 }
 
-int chunk_get_line(const Chunk *c, const int offset)
+static int chunk_get_line(const Chunk *c, const int offset)
 {
     bool found = false;
     int low = 0;
@@ -49,7 +49,7 @@ int chunk_get_line(const Chunk *c, const int offset)
     return c->lines[mid];
 }
 
-void chunk_write(Chunk *c, byte b, int line)
+static void chunk_write(Chunk *c, byte b, int line)
 {
     size_t len = buf_len(c->lines);
     if (len == 0 || c->lines[len - 1] != line) {
@@ -59,7 +59,7 @@ void chunk_write(Chunk *c, byte b, int line)
     buf_push(c->code, b);
 }
 
-void chunk_write_constant(Chunk *c, Value v, int line)
+static void chunk_write_constant(Chunk *c, Value v, int line)
 {
     int constant = chunk_add_constant(c, v);
     if (buf_len(c->constants) <= 0xFF) {
