@@ -63,6 +63,11 @@ static ParseRule parse_rules[] = {
     [TOKEN_EOF]           = { NULL,     NULL,    PREC_NONE   },
 };
 
+static Chunk *current_chunk(void)
+{
+    return chunk;
+}
+
 static void error_at(Token *token, const char *message)
 {
     if (parser.panic_mode) {
@@ -118,17 +123,12 @@ static void consume(TokenType type, const char *message)
 
 static void emit_byte(byte b)
 {
-    chunk_write(chunk, (byte[]){ b }, 1, parser.previous.line);
-}
-
-static void emit_bytes(const byte *bytes, int count)
-{
-    chunk_write(chunk, bytes, count, parser.previous.line);
+    chunk_write(current_chunk(), (byte[]){ b }, 1, parser.previous.line);
 }
 
 static void emit_bytes2(const byte b1, byte b2)
 {
-    chunk_write(chunk, (byte[]){ b1, b2 }, 2, parser.previous.line);
+    chunk_write(current_chunk(), (byte[]){ b1, b2 }, 2, parser.previous.line);
 }
 
 static void emit_return()
@@ -138,7 +138,7 @@ static void emit_return()
 
 static byte make_constant(Value v)
 {
-    int constant = chunk_add_constant(chunk, v);
+    int constant = chunk_add_constant(current_chunk(), v);
     if (constant > UINT8_MAX) {
         error("Too many constants in one chunk.");
         return 0;
@@ -156,7 +156,7 @@ static void end_compiler()
 {
 #ifdef DEBUG_PRINT_CODE
     if (!parser.had_error) {
-        chunk_disassemble(chunk, "code");
+        chunk_disassemble(current_chunk(), "code");
     }
 #endif
     emit_return();
