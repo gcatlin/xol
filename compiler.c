@@ -190,13 +190,13 @@ static void number(void)
 
 static void unary(void)
 {
-    TokenType op_type = parser.previous.type;
+    TokenType op = parser.previous.type;
 
     // Compile the operand.
     parse_precedence(PREC_UNARY);
 
     // Emit the operator instruction.
-    switch (op_type) {
+    switch (op) {
         case TOKEN_MINUS: emit_byte(OP_NEGATE); break;
         default: return; // Unreachable.
     }
@@ -204,13 +204,13 @@ static void unary(void)
 
 static void binary(void)
 {
-    TokenType op_type = parser.previous.type;
+    TokenType op = parser.previous.type;
 
-    // Compile the right operand.
-    parse_precedence((Precedence)(parse_rules[op_type].precedence + 1));
+    // Compile the rhs operand.
+    parse_precedence((Precedence)(parse_rules[op].precedence + 1));
 
     // Emit the operator instruction.
-    switch (op_type) {
+    switch (op) {
         case TOKEN_PLUS:  emit_byte(OP_ADD); break;
         case TOKEN_MINUS: emit_byte(OP_SUB); break;
         case TOKEN_STAR:  emit_byte(OP_MUL); break;
