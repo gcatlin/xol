@@ -49,26 +49,30 @@ static int chunk_get_line(const Chunk *c, const int offset)
     return c->lines[mid];
 }
 
-static void chunk_write(Chunk *c, byte b, int line)
+static void chunk_write(Chunk *c, const byte *bytes, int count, int line)
 {
-    size_t len = buf_len(c->lines);
-    if (len == 0 || c->lines[len - 1] != line) {
+    size_t lines_len = buf_len(c->lines);
+    if (lines_len == 0 || c->lines[lines_len - 1] != line) {
         buf_push(c->lines, line);
         buf_push(c->offsets, buf_len(c->code));
     }
-    buf_push(c->code, b);
+
+    byte *dest = buf_append(c->code, count);
+    memcpy(dest, bytes, count);
 }
 
 static void chunk_write_constant(Chunk *c, Value v, int line)
 {
     int constant = chunk_add_constant(c, v);
     if (buf_len(c->constants) <= 0xFF) {
-        chunk_write(c, OP_CONSTANT, line);
-        chunk_write(c, constant, line);
+        chunk_write(c, (byte[]){ OP_CONSTANT, constant }, 2, line);
         return;
     }
-    chunk_write(c, OP_CONSTANT_X, line);
-    chunk_write(c, (constant >> 0), line);
-    chunk_write(c, (constant >> 8), line);
-    chunk_write(c, (constant >> 16), line);
+    byte bytes[] = {
+        OP_CONSTANT_X,
+        (constant >> 0),
+        (constant >> 8),
+        (constant >> 16)
+    };
+    chunk_write(c, bytes, 4, line);
 }

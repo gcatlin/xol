@@ -61,7 +61,7 @@ static ParseRule parse_rules[] = {
     [TOKEN_COMMENT]       = { NULL,     NULL,    PREC_NONE   },
     [TOKEN_ERROR]         = { NULL,     NULL,    PREC_NONE   },
     [TOKEN_EOF]           = { NULL,     NULL,    PREC_NONE   },
-}; 
+};
 
 static void error_at(Token *token, const char *message)
 {
@@ -118,13 +118,17 @@ static void consume(TokenType type, const char *message)
 
 static void emit_byte(byte b)
 {
-    chunk_write(chunk, b, parser.previous.line);
+    chunk_write(chunk, (byte[]){ b }, 1, parser.previous.line);
 }
 
-static void emit_bytes(byte b1, byte b2)
+static void emit_bytes(const byte *bytes, int count)
 {
-    emit_byte(b1);
-    emit_byte(b2);
+    chunk_write(chunk, bytes, count, parser.previous.line);
+}
+
+static void emit_bytes2(const byte b1, byte b2)
+{
+    chunk_write(chunk, (byte[]){ b1, b2 }, 2, parser.previous.line);
 }
 
 static void emit_return()
@@ -145,7 +149,7 @@ static byte make_constant(Value v)
 
 static void emit_constant(Value v)
 {
-    emit_bytes(OP_CONSTANT, make_constant(v));
+    emit_bytes2(OP_CONSTANT, make_constant(v));
 }
 
 static void end_compiler()
