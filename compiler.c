@@ -198,7 +198,7 @@ static void unary(void)
     // Emit the operator instruction.
     switch (op) {
         case TOKEN_MINUS: emit_byte(OP_NEGATE); break;
-        default: return; // Unreachable.
+        default:          assert(0 && "unreachable");
     }
 }
 
@@ -215,7 +215,7 @@ static void binary(void)
         case TOKEN_MINUS: emit_byte(OP_SUB); break;
         case TOKEN_STAR:  emit_byte(OP_MUL); break;
         case TOKEN_SLASH: emit_byte(OP_DIV); break;
-        default:          return; // Unreachable.
+        default:          assert(0 && "unreachable");
     }
 }
 
