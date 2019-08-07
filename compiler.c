@@ -18,6 +18,7 @@ static Parser  parser;
 static ParseRule parse_rules[] = {
     //                        prefix    infix    precedence
     [TOKEN_NONE]          = { NULL,     NULL,    PREC_NONE   },
+
     [TOKEN_BANG]          = { NULL,     NULL,    PREC_NONE   },
     [TOKEN_BANG_EQUAL]    = { NULL,     NULL,    PREC_NONE   },
     [TOKEN_COMMA]         = { NULL,     NULL,    PREC_NONE   },
@@ -152,15 +153,10 @@ static void end_compiler(void)
     emit_return();
 }
 
-static ParseRule *get_rule(TokenType type)
-{
-    return &parse_rules[type];
-}
-
 static void parse_precedence(Precedence precedence)
 {
     advance();
-    ParseFn prefix_rule_fn = get_rule(parser.previous.type)->prefix;
+    ParseFn prefix_rule_fn = parse_rules[parser.previous.type].prefix;
     if (prefix_rule_fn == NULL) {
         error("Expect expression.");
         return;
@@ -168,9 +164,9 @@ static void parse_precedence(Precedence precedence)
 
     prefix_rule_fn();
 
-    while (precedence <= get_rule(parser.current.type)->precedence) {
+    while (precedence <= parse_rules[parser.current.type].precedence) {
         advance();
-        ParseFn infix_rule_fn = get_rule(parser.previous.type)->infix;
+        ParseFn infix_rule_fn = parse_rules[parser.previous.type].infix;
         infix_rule_fn();
     }
 }
@@ -211,8 +207,7 @@ static void binary(void)
     TokenType op_type = parser.previous.type;
 
     // Compile the right operand.
-    ParseRule *rule = get_rule(op_type);
-    parse_precedence((Precedence)(rule->precedence + 1));
+    parse_precedence((Precedence)(parse_rules[op_type].precedence + 1));
 
     // Emit the operator instruction.
     switch (op_type) {
