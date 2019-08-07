@@ -57,6 +57,9 @@ BufHdr *buf_hdr(const void *b) { return (b ? (BufHdr *)buf__raw(b) : NULL); }
 // Returns the number of elements in the buffer
 int buf_len(const void *b) { return (b ? buf__len(b) : 0); }
 
+// Returns pointer to the last element in the vector.
+#define buf_peek(b, dist) ((b) && buf__len(b) > (dist) ? (b)+buf__len(b)-1-(dist) : NULL)
+
 // Adds a new element at the end of the buffer.
 #define buf_push(b, v) (buf__fit(b, buf_len((b))+1), (b)[buf__len(b)++]=(v), (b)+buf__len(b)-1)
 
@@ -288,6 +291,30 @@ void buf_last_test(void)
     buf_free(b3);
 }
 
+void buf_peek_test(void)
+{
+    // // clang-format off
+    // struct t {
+    // } tt[] = {
+    // };
+    // // clang-format on
+    // for (struct t *t = tt, *end = tt + BUF_COUNT(tt); t != end; ++t) {
+    // }
+
+    int *b = NULL;
+    int n = 1024;
+    for (int i = 0; i < n; i++) {
+        buf_push(b, i);
+    }
+    for (int i = 0, max = buf_len(b); i < max; i++) {
+        assert(*buf_peek(b, n-i-1) == i);
+    }
+
+    int *p = buf_push(b, n + 1);
+    assert(buf_peek(b, 0) == p);
+    buf_free(b);
+}
+
 void buf_push_test(void)
 {
     // // clang-format off
@@ -407,8 +434,9 @@ void buf_test(void)
     buf_end_test();
     buf_free_test();
     buf_last_test();
-    buf_push_test();
+    buf_peek_test();
     buf_pop_test();
+    buf_push_test();
     buf_reserve_test();
     buf_take_test();
 }
