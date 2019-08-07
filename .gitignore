@@ -2,6 +2,7 @@
 xol
 
 .ccls-cache/
+vim.session
 
 # Prerequisites
 *.d
