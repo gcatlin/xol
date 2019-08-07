@@ -7,7 +7,7 @@
 #include <string.h>
 
 #define DEBUG_PRINT_CODE
-// #define DEBUG_TRACE_EXECUTION
+#define DEBUG_TRACE_EXECUTION
 
 #define ANSI_RESET     "\x1b[0m"
 #define ANSI_BOLD      "\x1b[1m"

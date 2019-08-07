@@ -91,8 +91,16 @@ static int instr_disassemble(const Chunk *chunk, const int offset)
 static void chunk_disassemble(Chunk *c, const char *name)
 {
     printf("=== %s ===\n", name);
-    printf("OFFSET B0 B1 B2 B3 LINE   OPCODE\n");
-    printf("------ -- -- -- -- -----  ----------------\n");
+    printf("OFFSET B0 B1 B2 B3 LINE   OPCODE           CID  Value");
+#ifdef DEBUG_TRACE_EXECUTION
+    printf("\tStack");
+#endif
+    printf("\n");
+    printf("------ -- -- -- -- -----  ---------------- ---- -----");
+#ifdef DEBUG_TRACE_EXECUTION
+    printf("\t-----");
+#endif
+    printf("\n");
     for (int i = 0, max = buf_len(c->code); i < max;) {
         i = instr_disassemble(c, i);
         printf("\n");
