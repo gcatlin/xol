@@ -5,10 +5,11 @@
 #include "chunk.c"
 #include "scanner.c"
 
-static void binary();
-static void grouping();
-static void number();
-static void unary();
+// Forward declared so they are available for parse rules
+static void binary(void);
+static void grouping(void);
+static void number(void);
+static void unary(void);
 
 static Chunk   *chunk;
 static Scanner scanner;
@@ -99,7 +100,7 @@ static void error_at_current(const char *message)
     error_at(&parser.current, message);
 }
 
-static void advance()
+static void advance(void)
 {
     parser.previous = parser.current;
 
@@ -131,7 +132,7 @@ static void emit_bytes(const byte b1, byte b2)
     chunk_write(current_chunk(), (byte[]){ b1, b2 }, 2, parser.previous.line);
 }
 
-static void emit_return()
+static void emit_return(void)
 {
     emit_byte(OP_RETURN);
 }
@@ -141,7 +142,7 @@ static void emit_constant(Value v)
     chunk_write_constant(current_chunk(), v, parser.previous.line);
 }
 
-static void end_compiler()
+static void end_compiler(void)
 {
 #ifdef DEBUG_PRINT_CODE
     if (!parser.had_error) {
@@ -174,24 +175,24 @@ static void parse_precedence(Precedence precedence)
     }
 }
 
-static void expression()
+static void expression(void)
 {
     parse_precedence(PREC_ASSIGNMENT);
 }
 
-static void grouping()
+static void grouping(void)
 {
     expression();
     consume(TOKEN_RIGHT_PAREN, "Expect ')' after expression.");
 }
 
-static void number()
+static void number(void)
 {
     double value = strtod(parser.previous.start, NULL);
     emit_constant(value);
 }
 
-static void unary()
+static void unary(void)
 {
     TokenType op_type = parser.previous.type;
 
@@ -205,7 +206,7 @@ static void unary()
     }
 }
 
-static void binary()
+static void binary(void)
 {
     TokenType op_type = parser.previous.type;
 
