@@ -136,20 +136,9 @@ static void emit_return()
     emit_byte(OP_RETURN);
 }
 
-static byte make_constant(Value v)
-{
-    int constant = chunk_add_constant(current_chunk(), v);
-    if (constant > UINT8_MAX) {
-        error("Too many constants in one chunk.");
-        return 0;
-    }
-
-    return (byte)constant;
-}
-
 static void emit_constant(Value v)
 {
-    emit_bytes(OP_CONSTANT, make_constant(v));
+    chunk_write_constant(current_chunk(), v, parser.previous.line);
 }
 
 static void end_compiler()
