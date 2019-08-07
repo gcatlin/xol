@@ -1,7 +1,6 @@
 #pragma once
 
 #include "common.h"
-#include "token.c"
 
 static bool is_alpha(const char c)
 {
@@ -12,12 +11,6 @@ static bool is_digit(char c)
 {
     return c >= '0' && c <= '9';
 }
-
-typedef struct {
-    const char *start;   // token
-    const char *current; // cursor
-    int         line;
-} Scanner;
 
 static void scanner_init(Scanner *s, const char *source)
 {

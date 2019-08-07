@@ -1,8 +1,12 @@
 #pragma once
 
-#include "chunk.c"
 #include "common.h"
+#include "chunk.c"
 
+static int InstrSize[op__count] = {
+    [OP_CONSTANT]   = 2,
+    [OP_CONSTANT_X] = 4,
+};
 
 static void print_value(Value v)
 {

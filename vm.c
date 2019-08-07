@@ -1,24 +1,11 @@
 #pragma once
 
-#include "buf.h"
 #include "common.h"
+#include "buf.h"
 
 #include "chunk.c"
+#include "compiler.c"
 #include "debug.c"
-#include "scanner.c"
-#include "token.c"
-
-typedef enum {
-    INTERPRET_OK,
-    INTERPRET_COMPILE_ERROR,
-    INTERPRET_RUNTIME_ERROR
-} VMInterpretResult;
-
-typedef struct {
-    Chunk *chunk;
-    byte  *ip;
-    Value *stack; // stretchy buffer
-} VM;
 
 static void vm_reset_stack(VM *vm)
 {
@@ -52,7 +39,7 @@ static VMInterpretResult vm_run(VM *vm)
             fputs("\t[ ", stdout);
             for (Value *it = vm->stack; it != buf_end(vm->stack); ++it) {
                 print_value(*it);
-                fputs(", ", stdout);
+                fputs(" ", stdout);
             }
             fputs("]\n", stdout);
         }
@@ -78,37 +65,21 @@ static VMInterpretResult vm_run(VM *vm)
 #undef READ_CONSTANT_X
 }
 
-static void vm_compile(VM *vm, const char *source)
-{
-    Scanner *s = calloc(1, sizeof(Scanner));
-    scanner_init(s, source);
-
-    int line = -1;
-    for (;;) {
-        Token token = scanner_scan_token(s);
-        if (token.line != line) {
-            printf("%4d ", token.line);
-            line = token.line;
-        } else {
-            printf("   | ");
-        }
-
-        if (token.type == TOKEN_EOF) {
-            puts("EOF");
-            break;
-        }
-        switch (token.type) {
-            case TOKEN_ERROR:
-                printf(ANSI_FG_RED "ERROR        " ANSI_RESET " %.*s\n", token.length, token.start);
-                break;
-            default:
-                printf("%-13s '%.*s'\n", token_type_name(token.type)+6, token.length, token.start);
-        }
-    }
-}
-
 static VMInterpretResult vm_interpret(VM *vm, const char *source)
 {
-    vm_compile(vm, source);
-    return INTERPRET_OK;
+    Chunk *chunk = calloc(1, sizeof(Chunk));
+    chunk_init(chunk);
+
+    if (!compile(source, chunk)) {
+        chunk_free(chunk);
+        return INTERPRET_COMPILE_ERROR;
+    }
+
+    vm->chunk = chunk;
+    vm->ip = vm->chunk->code;
+    VMInterpretResult result = vm_run(vm);
+
+    chunk_free(chunk);
+
+    return result;
 }

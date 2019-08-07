@@ -1,5 +1,5 @@
-#include "chunk.c"
-#include "debug.c"
+#include "common.h"
+#include "buf.h"
 #include "vm.c"
 
 size_t fsize(FILE *stream)

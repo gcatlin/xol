@@ -1,31 +1,7 @@
 #pragma once
 
-#include "buf.h"
 #include "common.h"
-
-typedef enum {
-    OP_CONSTANT,
-    OP_CONSTANT_X,
-    OP_ADD,
-    OP_SUB,
-    OP_MUL,
-    OP_DIV,
-    OP_NEGATE,
-    OP_RETURN,
-    op__count,
-} OpCode;
-
-static int InstrSize[op__count] = {
-    [OP_CONSTANT] = 2,
-    [OP_CONSTANT_X] = 4,
-};
-
-typedef struct {
-    byte *code;
-    int *lines;   // array of line numbers
-    int *offsets; // array of byte offsets at the start of each line
-    Value *constants;
-} Chunk;
+#include "buf.h"
 
 void chunk_init(Chunk *c)
 {
