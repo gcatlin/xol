@@ -8,6 +8,7 @@
 // Forward declared so they are available for parse rules
 static void binary(void);
 static void grouping(void);
+static void literal(void);
 static void number(void);
 static void unary(void);
 
@@ -19,7 +20,7 @@ static ParseRule parse_rules[] = {
     //                        prefix    infix    precedence
     [TOKEN_NONE]          = { NULL,     NULL,    PREC_NONE   },
 
-    [TOKEN_BANG]          = { NULL,     NULL,    PREC_NONE   },
+    [TOKEN_BANG]          = { unary,    NULL,    PREC_NONE   },
     [TOKEN_BANG_EQUAL]    = { NULL,     NULL,    PREC_NONE   },
     [TOKEN_COMMA]         = { NULL,     NULL,    PREC_NONE   },
     [TOKEN_DOT]           = { NULL,     NULL,    PREC_NONE   },
@@ -46,17 +47,17 @@ static ParseRule parse_rules[] = {
     [TOKEN_AND]           = { NULL,     NULL,    PREC_NONE   },
     [TOKEN_CLASS]         = { NULL,     NULL,    PREC_NONE   },
     [TOKEN_ELSE]          = { NULL,     NULL,    PREC_NONE   },
-    [TOKEN_FALSE]         = { NULL,     NULL,    PREC_NONE   },
+    [TOKEN_FALSE]         = { literal,  NULL,    PREC_NONE   },
     [TOKEN_FOR]           = { NULL,     NULL,    PREC_NONE   },
     [TOKEN_FN]            = { NULL,     NULL,    PREC_NONE   },
     [TOKEN_IF]            = { NULL,     NULL,    PREC_NONE   },
-    [TOKEN_NIL]           = { NULL,     NULL,    PREC_NONE   },
+    [TOKEN_NIL]           = { literal,  NULL,    PREC_NONE   },
     [TOKEN_OR]            = { NULL,     NULL,    PREC_NONE   },
     [TOKEN_PRINT]         = { NULL,     NULL,    PREC_NONE   },
     [TOKEN_RETURN]        = { NULL,     NULL,    PREC_NONE   },
     [TOKEN_SUPER]         = { NULL,     NULL,    PREC_NONE   },
     [TOKEN_THIS]          = { NULL,     NULL,    PREC_NONE   },
-    [TOKEN_TRUE]          = { NULL,     NULL,    PREC_NONE   },
+    [TOKEN_TRUE]          = { literal,  NULL,    PREC_NONE   },
     [TOKEN_VAR]           = { NULL,     NULL,    PREC_NONE   },
     [TOKEN_WHILE]         = { NULL,     NULL,    PREC_NONE   },
 
@@ -185,7 +186,7 @@ static void grouping(void)
 static void number(void)
 {
     double value = strtod(parser.previous.start, NULL);
-    emit_constant(value);
+    emit_constant(NUMBER_VAL(value));
 }
 
 static void unary(void)
@@ -197,6 +198,7 @@ static void unary(void)
 
     // Emit the operator instruction.
     switch (op) {
+        case TOKEN_BANG:  emit_byte(OP_NOT); break;
         case TOKEN_MINUS: emit_byte(OP_NEGATE); break;
         default:          assert(0 && "unreachable");
     }
@@ -215,6 +217,16 @@ static void binary(void)
         case TOKEN_MINUS: emit_byte(OP_SUB); break;
         case TOKEN_STAR:  emit_byte(OP_MUL); break;
         case TOKEN_SLASH: emit_byte(OP_DIV); break;
+        default:          assert(0 && "unreachable");
+    }
+}
+
+static void literal()
+{
+    switch (parser.previous.type) {
+        case TOKEN_NIL:   emit_byte(OP_NIL);   break;
+        case TOKEN_FALSE: emit_byte(OP_FALSE); break;
+        case TOKEN_TRUE:  emit_byte(OP_TRUE);  break;
         default:          assert(0 && "unreachable");
     }
 }

@@ -61,7 +61,6 @@ int main(int argc, const char *argv[])
 {
     buf_test();
 
-    // VM *vm = NULL;
     VM *vm = calloc(1, sizeof(VM));
     vm_init(vm);
 

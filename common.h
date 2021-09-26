@@ -1,5 +1,6 @@
 #pragma once
 
+#include <stdarg.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -24,16 +25,44 @@
 
 #define countof(x) ((sizeof(x) / sizeof(0 [x])) / ((size_t)(!(sizeof(x) % sizeof(0 [x])))))
 
+typedef enum {
+    VAL_BOOL,
+    VAL_NIL,
+    VAL_NUMBER,
+} ValueType;
+
+typedef struct {
+    ValueType type;
+    union {
+        bool boolean;
+        double number;
+    } as;
+} Value;
+
+#define NIL_VAL       ((Value){ VAL_NIL,    { 0 } })
+#define BOOL_VAL(v)   ((Value){ VAL_BOOL,   { .boolean = (v) } })
+#define NUMBER_VAL(v) ((Value){ VAL_NUMBER, { .number = (v) } })
+
+#define AS_BOOL(v)    ((v).as.boolean)
+#define AS_NUMBER(v)  ((v).as.number)
+
+#define IS_NIL(v)     ((v).type == VAL_NIL)
+#define IS_BOOL(v)    ((v).type == VAL_BOOL)
+#define IS_NUMBER(v)  ((v).type == VAL_NUMBER)
+
 typedef uint8_t byte;
-typedef double Value;
 
 typedef enum {
     OP_CONSTANT,
     OP_CONSTANT_X,
+    OP_NIL,
+    OP_FALSE,
+    OP_TRUE,
     OP_ADD,
     OP_SUB,
     OP_MUL,
     OP_DIV,
+    OP_NOT,
     OP_NEGATE,
     OP_RETURN,
     op__count,

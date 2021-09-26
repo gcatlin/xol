@@ -10,7 +10,11 @@ static int InstrSize[op__count] = {
 
 static void print_value(Value v)
 {
-    printf("%g", v);
+    switch (v.type) {
+        case VAL_NIL:    printf("nil"); break;
+        case VAL_BOOL:   printf(AS_BOOL(v) ? "true" : "false"); break;
+        case VAL_NUMBER: printf("%g", AS_NUMBER(v)); break;
+    }
 }
 
 static int const_instr(const char *name, const Chunk *c, const int offset)
@@ -74,10 +78,14 @@ static int instr_disassemble(const Chunk *chunk, const int offset)
     switch (instr) { // clang-format off
         case OP_CONSTANT:   const_instr("OP_CONSTANT", chunk, offset); break;
         case OP_CONSTANT_X: const_long_instr("OP_CONSTANT_X", chunk, offset); break;
+        case OP_NIL:        simple_instr("OP_NIL", offset); break;
+        case OP_FALSE:      simple_instr("OP_FALSE", offset); break;
+        case OP_TRUE:       simple_instr("OP_TRUE", offset); break;
         case OP_ADD:        simple_instr("OP_ADD", offset); break;
         case OP_SUB:        simple_instr("OP_SUB", offset); break;
         case OP_MUL:        simple_instr("OP_MUL", offset); break;
         case OP_DIV:        simple_instr("OP_DIV", offset); break;
+        case OP_NOT:        simple_instr("OP_NOT", offset); break;
         case OP_NEGATE:     simple_instr("OP_NEGATE", offset); break;
         case OP_RETURN:     simple_instr("OP_RETURN", offset); break;
         default:            unknown_instr(instr, offset); break;
