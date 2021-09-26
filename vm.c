@@ -7,6 +7,17 @@
 #include "compiler.c"
 #include "debug.c"
 
+static bool values_equal(Value a, Value b)
+{
+    if (a.type != b.type) return false;
+
+    switch (a.type) {
+        case VAL_NIL:    return true;
+        case VAL_BOOL:   return AS_BOOL(a) == AS_BOOL(b);
+        case VAL_NUMBER: return AS_NUMBER(a) == AS_NUMBER(b);
+    }
+}
+
 static void vm_reset_stack(VM *vm)
 {
     buf_clear(vm->stack);
@@ -38,7 +49,7 @@ static void vm_runtime_error(VM *vm, const char *format, ...)
     vm_reset_stack(vm);
 }
 
-static VMInterpretResult vm_run(VM *vm)
+static VMResult vm_run(VM *vm)
 {
 #define IS_FALSEY(v) (IS_NIL(v) || (IS_BOOL(v) && !AS_BOOL(v)))
 #define PEEK(dist) (*buf_peek(vm->stack, dist))
@@ -48,16 +59,16 @@ static VMInterpretResult vm_run(VM *vm)
 #define READ_CONSTANT() (vm->chunk->constants[NEXT()])
 #define READ_CONSTANT_X(b0, b1, b2) \
     (vm->chunk->constants[(b0) << 0 | (b1) << 8 | (b2) << 16])
-#define BINARY_OP(TO_VAL, op)                              \
-    do {                                                   \
-      if (!IS_NUMBER(PEEK(0)) || !IS_NUMBER(PEEK(1))) {    \
-        vm_runtime_error(vm, "Operands must be numbers."); \
-        return INTERPRET_RUNTIME_ERROR;                    \
-      }                                                    \
-                                                           \
-      double b = AS_NUMBER(POP());                         \
-      double a = AS_NUMBER(POP());                         \
-      PUSH(TO_VAL(a op b));                                \
+#define BINARY_OP(TO_VAL, op)                                  \
+    do {                                                       \
+        if (!IS_NUMBER(PEEK(0)) || !IS_NUMBER(PEEK(1))) {      \
+            vm_runtime_error(vm, "Operands must be numbers."); \
+            return (VMResult){ INTERPRET_RUNTIME_ERROR, {0} }; \
+        }                                                      \
+                                                               \
+        double b = AS_NUMBER(POP());                           \
+        double a = AS_NUMBER(POP());                           \
+        PUSH(TO_VAL(a op b));                                  \
     } while (false)
 
     for (;;) {
@@ -80,19 +91,29 @@ static VMInterpretResult vm_run(VM *vm)
             case OP_NIL:        PUSH(NIL_VAL); break;
             case OP_FALSE:      PUSH(BOOL_VAL(false)); break;
             case OP_TRUE:       PUSH(BOOL_VAL(true)); break;
+            case OP_EQ:         { Value b = POP(); Value a = POP(); PUSH(BOOL_VAL(values_equal(a, b))); } break;
+            case OP_GT:         BINARY_OP(BOOL_VAL, >); break;
+            case OP_LT:         BINARY_OP(BOOL_VAL, <); break;
             case OP_ADD:        BINARY_OP(NUMBER_VAL, +); break;
             case OP_SUB:        BINARY_OP(NUMBER_VAL, -); break;
             case OP_MUL:        BINARY_OP(NUMBER_VAL, *); break;
             case OP_DIV:        BINARY_OP(NUMBER_VAL, /); break;
             case OP_NOT:        PUSH(BOOL_VAL(IS_FALSEY(POP()))); break;
-            case OP_NEGATE:     if (!IS_NUMBER(PEEK(0))) {
-                                     vm_runtime_error(vm, "Operand must be a number.");
-                                     return INTERPRET_RUNTIME_ERROR;
+            case OP_NEG:        {
+                                    if (!IS_NUMBER(PEEK(0))) {
+                                        vm_runtime_error(vm, "Operand must be a number.");
+                                        return (VMResult){ INTERPRET_RUNTIME_ERROR, {0} };
+                                    }
+                                    double n = -AS_NUMBER(POP());
+                                    PUSH(NUMBER_VAL(n));
                                 }
-                                double n = -AS_NUMBER(POP());
-                                PUSH(NUMBER_VAL(n));
                                 break;
-            case OP_RETURN:     puts(""); print_value(POP()); puts(""); return INTERPRET_OK;
+            case OP_RETURN:     {
+                                    Value v = POP();
+                                    puts(""); print_value(v); puts("");
+                                    return (VMResult){ INTERPRET_OK, v };
+                                }
+            default:            assert(0 && "unreachable");
         } // clang-format on
     }
 
@@ -106,21 +127,28 @@ static VMInterpretResult vm_run(VM *vm)
 #undef BINARY_OP
 }
 
-static VMInterpretResult vm_interpret(VM *vm, const char *source)
+static VMResult vm_interpret(VM *vm, const char *source)
 {
     Chunk *chunk = calloc(1, sizeof(Chunk));
     chunk_init(chunk);
 
     if (!compile(source, chunk)) {
         chunk_free(chunk);
-        return INTERPRET_COMPILE_ERROR;
+        return (VMResult){ INTERPRET_COMPILE_ERROR, {0} };
     }
 
     vm->chunk = chunk;
     vm->ip = vm->chunk->code;
-    VMInterpretResult result = vm_run(vm);
+    VMResult result = vm_run(vm);
 
     chunk_free(chunk);
 
     return result;
+}
+
+static void vm_test(void)
+{
+    VM *vm = calloc(1, sizeof(VM));
+    vm_init(vm);
+    assert(7 == AS_NUMBER(vm_interpret(vm, "(-1 + 2) * 3 - -4").value));
 }

@@ -37,7 +37,7 @@ static void eval_file(VM *vm, const char *path)
     char *source = NULL;
     buf_reserve(source, 16384);
     read_file(source, path);
-    VMInterpretResult result = vm_interpret(vm, source);
+    VMInterpretResult result = vm_interpret(vm, source).result;
 
     if (result == INTERPRET_COMPILE_ERROR) exit(ERR_COMPILE);
     if (result == INTERPRET_RUNTIME_ERROR) exit(ERR_RUNTIME);
@@ -60,6 +60,7 @@ static void repl(VM *vm)
 int main(int argc, const char *argv[])
 {
     buf_test();
+    vm_test();
 
     VM *vm = calloc(1, sizeof(VM));
     vm_init(vm);

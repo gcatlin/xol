@@ -58,12 +58,15 @@ typedef enum {
     OP_NIL,
     OP_FALSE,
     OP_TRUE,
+    OP_EQ,
+    OP_GT,
+    OP_LT,
     OP_ADD,
     OP_SUB,
     OP_MUL,
     OP_DIV,
     OP_NOT,
-    OP_NEGATE,
+    OP_NEG,
     OP_RETURN,
     op__count,
 } OpCode;
@@ -143,6 +146,11 @@ typedef enum {
     INTERPRET_COMPILE_ERROR,
     INTERPRET_RUNTIME_ERROR,
 } VMInterpretResult;
+
+typedef struct {
+    VMInterpretResult result;
+    Value             value;
+} VMResult;
 
 typedef struct {
     Chunk *chunk;

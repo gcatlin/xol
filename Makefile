@@ -15,6 +15,10 @@ build:
 clean:
 	@rm -rf ${NAME} ${NAME}.dSYM
 
+.PHONY: cpp
+cpp:
+	@${CC} ${SRC_FILES} ${CC_FLAGS} -E
+
 .PHONY: run
 run: build
 	@./${NAME}

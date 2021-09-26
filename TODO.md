@@ -1,0 +1,2 @@
+- add ternary() fn?
+- move stuff into src/ (and maybe include/)

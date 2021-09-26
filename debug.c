@@ -81,12 +81,15 @@ static int instr_disassemble(const Chunk *chunk, const int offset)
         case OP_NIL:        simple_instr("OP_NIL", offset); break;
         case OP_FALSE:      simple_instr("OP_FALSE", offset); break;
         case OP_TRUE:       simple_instr("OP_TRUE", offset); break;
+        case OP_EQ:         simple_instr("OP_EQ", offset); break;
+        case OP_GT:         simple_instr("OP_GT", offset); break;
+        case OP_LT:         simple_instr("OP_LT", offset); break;
         case OP_ADD:        simple_instr("OP_ADD", offset); break;
         case OP_SUB:        simple_instr("OP_SUB", offset); break;
         case OP_MUL:        simple_instr("OP_MUL", offset); break;
         case OP_DIV:        simple_instr("OP_DIV", offset); break;
         case OP_NOT:        simple_instr("OP_NOT", offset); break;
-        case OP_NEGATE:     simple_instr("OP_NEGATE", offset); break;
+        case OP_NEG:        simple_instr("OP_NEG", offset); break;
         case OP_RETURN:     simple_instr("OP_RETURN", offset); break;
         default:            unknown_instr(instr, offset); break;
     } // clang-format on
